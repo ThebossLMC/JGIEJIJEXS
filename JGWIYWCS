@@ -1,0 +1,364 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Moonium Hub",
+    LoadingTitle = "Loading Moonium....",
+    LoadingSubtitle = "by polar",
+    ConfigurationSaving = {
+       Enabled = true,
+       FolderName = nil, -- Create a custom folder for your hub/game
+       FileName = "Big Hub"
+    },
+    Discord = {
+       Enabled = True,
+       Invite = "3cMYYs8T", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ABCD would be ABCD
+       RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+    },
+    KeySystem = true, -- Set this to true to use our key system
+    KeySettings = {
+       Title = "Moonium.",
+       Subtitle = "Moonium's key system",
+       Note = "Join the discord",
+       FileName = "Key", -- It is recommended to use         something unique as other scripts using Rayfield may overwrite your key file
+       SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+       GrabKeyFromSite = true, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+       Key = {"https://pastebin.com/raw/prNUTMMp"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+    }
+ })
+
+ local Tab = Window:CreateTab("Welcome..", nil) -- Title, Image
+ local Section = Tab:CreateSection("Welcome")
+
+ Rayfield:Notify({
+    Title = "Offical Moonium | BETA 1.0",
+    Content = "Updates will be added.",
+    Duration = 6.5,
+    Image = 4483362458,
+    Actions = { -- Notification Buttons
+       Ignore = {
+          Name = "alright bro",
+          Callback = function()
+          print("Player clicked okay!")
+       end
+    },
+ },
+ })
+
+ local Button = Tab:CreateButton({
+    Name = "Moonium on top.",
+    Callback = function()
+    -- The function that takes place when the button is pressed
+    end,
+ })
+
+ local Button = Tab:CreateButton({
+    Name = "Version: 1.0 | BETA",
+    Callback = function()
+    -- The function that takes place when the button is pressed
+    end,
+})
+
+ local Button = Tab:CreateButton({
+    Name = "Panic | Destroy GUI",
+    Callback = function()
+    -- The function that takes place when the button is pressed
+    Rayfield:Destroy()
+    end,
+ })
+
+ local Tab = Window:CreateTab("Combat")
+ local Section = Tab:CreateSection("Combat systems.")
+
+ local Button = Tab:CreateButton({
+    Name = "Camlock | ",
+    Callback = function()
+    -- The function that takes place when the input is changed
+    -- The variable (Text) is a string for the value in the text box
+    getgenv().OldAimPart = "UpperTorso"
+    getgenv().AimPart = "UpperTorso" -- For R15 Games: {UpperTorso, LowerTorso, HumanoidRootPart, Head} | For R6 Games: {Head, Torso, HumanoidRootPart}  
+        getgenv().AimlockKey = "q"
+        getgenv().AimRadius = 60 -- How far away from someones character you want to lock on at
+        getgenv().ThirdPerson = true 
+        getgenv().FirstPerson = true
+        getgenv().TeamCheck = false -- Check if Target is on your Team (True means it wont lock onto your teamates, false is vice versa) (Set it to false if there are no teams)
+        getgenv().PredictMovement = true -- Predicts if they are moving in fast velocity (like jumping) so the aimbot will go a bit faster to match their speed 
+        getgenv().PredictionVelocity = 6.612
+        getgenv().CheckIfJumped = true
+        getgenv().Smoothness = true
+        getgenv().SmoothnessAmount = 1
+    
+        local Players, Uis, RService, SGui = game:GetService"Players", game:GetService"UserInputService", game:GetService"RunService", game:GetService"StarterGui";
+        local Client, Mouse, Camera, CF, RNew, Vec3, Vec2 = Players.LocalPlayer, Players.LocalPlayer:GetMouse(), workspace.CurrentCamera, CFrame.new, Ray.new, Vector3.new, Vector2.new;
+        local Aimlock, MousePressed, CanNotify = true, false, false;
+        local AimlockTarget;
+        local OldPre;
+        
+    
+        
+        getgenv().WorldToViewportPoint = function(P)
+            return Camera:WorldToViewportPoint(P)
+        end
+        
+        getgenv().WorldToScreenPoint = function(P)
+            return Camera.WorldToScreenPoint(Camera, P)
+        end
+        
+        getgenv().GetObscuringObjects = function(T)
+            if T and T:FindFirstChild(getgenv().AimPart) and Client and Client.Character:FindFirstChild("Head") then 
+                local RayPos = workspace:FindPartOnRay(RNew(
+                    T[getgenv().AimPart].Position, Client.Character.Head.Position)
+                )
+                if RayPos then return RayPos:IsDescendantOf(T) end
+            end
+        end
+        
+        getgenv().GetNearestTarget = function()
+            -- Credits to whoever made this, i didnt make it, and my own mouse2plr function kinda sucks
+            local players = {}
+            local PLAYER_HOLD  = {}
+            local DISTANCES = {}
+            for i, v in pairs(Players:GetPlayers()) do
+                if v ~= Client then
+                    table.insert(players, v)
+                end
+            end
+            for i, v in pairs(players) do
+                if v.Character ~= nil then
+                    local AIM = v.Character:FindFirstChild("Head")
+                    if getgenv().TeamCheck == true and v.Team ~= Client.Team then
+                        local DISTANCE = (v.Character:FindFirstChild("Head").Position - game.Workspace.CurrentCamera.CFrame.p).magnitude
+                        local RAY = Ray.new(game.Workspace.CurrentCamera.CFrame.p, (Mouse.Hit.p - game.Workspace.CurrentCamera.CFrame.p).unit * DISTANCE)
+                        local HIT,POS = game.Workspace:FindPartOnRay(RAY, game.Workspace)
+                        local DIFF = math.floor((POS - AIM.Position).magnitude)
+                        PLAYER_HOLD[v.Name .. i] = {}
+                        PLAYER_HOLD[v.Name .. i].dist= DISTANCE
+                        PLAYER_HOLD[v.Name .. i].plr = v
+                        PLAYER_HOLD[v.Name .. i].diff = DIFF
+                        table.insert(DISTANCES, DIFF)
+                    elseif getgenv().TeamCheck == false and v.Team == Client.Team then 
+                        local DISTANCE = (v.Character:FindFirstChild("Head").Position - game.Workspace.CurrentCamera.CFrame.p).magnitude
+                        local RAY = Ray.new(game.Workspace.CurrentCamera.CFrame.p, (Mouse.Hit.p - game.Workspace.CurrentCamera.CFrame.p).unit * DISTANCE)
+                        local HIT,POS = game.Workspace:FindPartOnRay(RAY, game.Workspace)
+                        local DIFF = math.floor((POS - AIM.Position).magnitude)
+                        PLAYER_HOLD[v.Name .. i] = {}
+                        PLAYER_HOLD[v.Name .. i].dist= DISTANCE
+                        PLAYER_HOLD[v.Name .. i].plr = v
+                        PLAYER_HOLD[v.Name .. i].diff = DIFF
+                        table.insert(DISTANCES, DIFF)
+                    end
+                end
+            end
+            
+            if unpack(DISTANCES) == nil then
+                return nil
+            end
+            
+            local L_DISTANCE = math.floor(math.min(unpack(DISTANCES)))
+            if L_DISTANCE > getgenv().AimRadius then
+                return nil
+            end
+            
+            for i, v in pairs(PLAYER_HOLD) do
+                if v.diff == L_DISTANCE then
+                    return v.plr
+                end
+            end
+            return nil
+        end
+        
+        Mouse.KeyDown:Connect(function(a)
+            if not (Uis:GetFocusedTextBox()) then 
+                if a == AimlockKey and AimlockTarget == nil then
+                    pcall(function()
+                        if MousePressed ~= true then MousePressed = true end 
+                        local Target;Target = GetNearestTarget()
+                        if Target ~= nil then 
+                            AimlockTarget = Target
+                        end
+                    end)
+                elseif a == AimlockKey and AimlockTarget ~= nil then
+                    if AimlockTarget ~= nil then AimlockTarget = nil end
+                    if MousePressed ~= false then 
+                        MousePressed = false 
+                    end
+                end
+            end
+        end)
+        
+        RService.RenderStepped:Connect(function()
+            if getgenv().ThirdPerson == true and getgenv().FirstPerson == true then 
+                if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude > 1 or (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude <= 1 then 
+                    CanNotify = true 
+                else 
+                    CanNotify = false 
+                end
+            elseif getgenv().ThirdPerson == true and getgenv().FirstPerson == false then 
+                if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude > 1 then 
+                    CanNotify = true 
+                else 
+                    CanNotify = false 
+                end
+            elseif getgenv().ThirdPerson == false and getgenv().FirstPerson == true then 
+                if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude <= 1 then 
+                    CanNotify = true 
+                else 
+                    CanNotify = false 
+                end
+            end
+            if Aimlock == true and MousePressed == true then 
+                if AimlockTarget and AimlockTarget.Character and AimlockTarget.Character:FindFirstChild(getgenv().AimPart) then 
+                    if getgenv().FirstPerson == true then
+                        if CanNotify == true then
+                            if getgenv().PredictMovement == true then
+                                if getgenv().Smoothness == true then
+                                    --// The part we're going to lerp/smoothen \\--
+                                    local Main = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position + AimlockTarget.Character[getgenv().AimPart].Velocity/PredictionVelocity)
+                                    
+                                    --// Making it work \\--
+                                    Camera.CFrame = Camera.CFrame:Lerp(Main, getgenv().SmoothnessAmount, Enum.EasingStyle.Elastic, Enum.EasingDirection.InOut)
+                                else
+                                    Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position + AimlockTarget.Character[getgenv().AimPart].Velocity/PredictionVelocity)
+                                end
+                            elseif getgenv().PredictMovement == false then 
+                                if getgenv().Smoothness == true then
+                                    --// The part we're going to lerp/smoothen \\--
+                                    local Main = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position)
+    
+                                    --// Making it work \\--
+                                    Camera.CFrame = Camera.CFrame:Lerp(Main, getgenv().SmoothnessAmount, Enum.EasingStyle.Elastic, Enum.EasingDirection.InOut)
+                                else
+                                    Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+             if CheckIfJumped == true then
+           if AimlockTarget.Character.HuDDDDDDDDDDWmanoid.FloorMaterial == Enum.Material.Air then
+        
+               getgenv().AimPart = "UpperTorso"
+           else
+             getgenv().AimPart = getgenv().OldAimPart
+    
+           end
+        end
+    end)
+    end,
+
+ })
+
+ local Button = Tab:CreateButton({
+    Name = "Antilock OP | Don't click twice",
+    Callback = function()
+-- made by polar
+
+-- Define a variable to store the current state (enabled/disabled)
+local isEnabled = false
+
+-- Function to execute when the "e" key is pressed
+function onKeyPress()
+  -- Toggle the state
+  isEnabled = not isEnabled
+
+  if isEnabled then
+    -- Code to run when the keybind is enabled (fly mode)
+    getgenv().Sky = true
+    getgenv().SkyAmount = 90
+
+    game:GetService("RunService").heartbeat:Connect(function()
+      if getgenv().Sky then -- Check if fly mode is still enabled
+        local vel = game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity
+        game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(0, getgenv().SkyAmount, 0)
+        game:GetService("RunService").RenderStepped:Wait()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity = vel
+      end
+    end)
+
+    -- Print "antilock enabled" notification (assuming you have a notification system)
+    -- Replace this with your preferred notification method if needed
+    print("Antilock Enabled!")  -- Example notification print
+  else
+    -- Code to run when the keybind is disabled (fly mode off)
+    getgenv().Sky = false
+
+    -- Print "antilock disabled" when disabled
+    print("antilock disabled")
+  end
+end
+
+-- Function to check if the "t" key is pressed
+function isKeyPressed(key)
+  return key == "t"
+end
+
+-- Check for key press in your main loop (using GetMouse().KeyDown)
+game.Players.LocalPlayer:GetMouse().KeyDown:Connect(function(key)
+  if isKeyPressed(key) then
+    onKeyPress()
+  end
+end)
+
+    end,
+ })
+
+local Button = Tab:CreateButton({
+    Name = "Highlight players",
+    Callback = function()
+    -- The function that takes place when the button is pressed
+    -- Local script (place in StarterCharacterScripts)
+
+local Players = game:GetService("Players")
+local function RefreshHighlights()
+  -- Loop through all players
+  for _, Player in pairs(Players:GetPlayers()) do
+    -- Skip the local player
+    if Player ~= Players.LocalPlayer then
+      local Character = Player.Character
+      
+      -- Remove any existing highlight
+      if Character and Character:FindFirstChildWhichIsA("Highlight") then
+        Character.Highlight:Destroy()
+      end
+      
+      -- Create and configure highlight (purple color)
+      if Character then
+        local Highlight = Instance.new("Highlight")
+        Highlight.FillColor = Color3.fromRGB(128, 0, 128) -- Purple highlight
+        Highlight.Parent = Character
+      end
+    end
+  end
+end
+
+-- Refresh highlights initially
+RefreshHighlights()
+
+-- Schedule refresh every 10 seconds
+task.wait(10)
+while true do
+  RefreshHighlights()
+  task.wait(10)
+end
+
+    end,
+ })
+
+ local Button = Tab:CreateButton({
+    Name = "Anticheat fucker | USE BEFORE ANYTHING",
+    Callback = function()
+    -- The function that takes place when the button is pressed
+    AntiCheatNamecall = hookmetamethod(game, "__namecall", newcclosure(function(Self, ...)
+        local Arguments = {...}
+        local AntiCheats = {"BreathingHAMON", "TeleportDetect", "JJARC", "TakePoisonDamage", "CHECKER_1", "CHECKER", "GUI_CHECK", "OneMoreTime", "checkingSPEED", "BANREMOTE", "PERMAIDBAN", "KICKREMOTE", "BR_KICKPC", "FORCEFIELD", "Christmas_Sock", "VirusCough", "Symbiote", "Symbioted", "RequestAFKDisplay"}
+    
+        if table.find(AntiCheats, Arguments[1]) and getnamecallmethod() == "FireServer" then
+            return
+        end
+    
+        return AntiCheatNamecall(Self, ...)
+    end))
+    end,
+ })
+
+ 
